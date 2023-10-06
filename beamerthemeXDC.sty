@@ -1,0 +1,73 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerthemeXDC}[2023/10/05]
+
+\usepackage[T1]{fontenc}
+\usepackage{tikz}
+\usepackage[sfdefault]{roboto}
+
+\setbeamertemplate{navigation symbols}{}
+
+\newenvironment{slide}{\begin{frame}}{\end{frame}}
+
+\setbeamercolor{normal text}{fg=darkgray}
+\setbeamercolor{titlelike}{fg=darkgray}
+\setbeamercolor{itemize item}{fg=darkgray}
+\setbeamercolor{itemize subitem}{fg=darkgray}
+\setbeamercolor{itemize subsubitem}{fg=darkgray}
+\setbeamercolor{section in head/foot}{fg=darkgray}
+\setbeamercolor{section in toc}{fg=darkgray}
+\setbeamercolor{subsection in toc}{fg=darkgray}
+\setbeamercolor{subsubsection in toc}{fg=darkgray}
+
+\setbeamersize{sidebar width left=0pt}
+\setbeamersize{text margin left=15pt}
+
+\setbeamertemplate{headline}{
+    \vspace{4pt}
+    \begin{beamercolorbox}[ht=2ex]{section in head/foot}
+    \hspace{2pt}
+    \ifx\insertsection\empty
+    \else
+        \insertsection
+        \ifx\insertsubsection\empty
+        \else
+            \hspace{0.5pt}
+            \raisebox{0.5pt}{$\blacktriangleright$}
+            \insertsubsection
+            \ifx\insertsubsubsection\empty
+                \else
+                \hspace{0.5pt}
+                \raisebox{0.5pt}{$\blacktriangleright$}
+                \insertsubsubsection
+            \fi
+        \fi
+    \fi
+    \end{beamercolorbox}
+}
+
+\setbeamertemplate{footline}{
+}
+
+\setbeamertemplate{frametitle}{
+    \vspace{12pt}
+    \huge\textbf{\insertframetitle}
+}
+
+\setbeamertemplate{itemize item}{
+    \raisebox{0.66pt}{\hbox{\large\donotcoloroutermaths$\bullet$}}
+}
+\setbeamertemplate{itemize subitem}{
+    \raisebox{0.66pt}{\hbox{\large\donotcoloroutermaths$\circ$}}
+}
+\setbeamertemplate{itemize subsubitem}{
+    \raisebox{0.66pt}{\hbox{\large\donotcoloroutermaths$\triangleright$}}
+}
+
+\setbeamertemplate{section in toc} {
+    \raisebox{0.66pt}{\hbox{\large\donotcoloroutermaths$\bullet$}} \inserttocsection
+}
+\setbeamertemplate{subsection in toc} {
+    \leavevmode\leftskip=1.4em \raisebox{0.66pt}{\hbox{\large\donotcoloroutermaths$\bullet$}} \small{\inserttocsubsection}\par
+}
+
+
