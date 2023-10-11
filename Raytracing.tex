@@ -205,14 +205,16 @@
    \item Bad for building many tiny acceleration structures
    \item Vulkan allows for building multiple acceleration structures at a time
   \end{itemize}
+  \pause
+  \item This is what happens when you don't batch:
  \end{itemize}
+ \includegraphics[width=\textwidth]{graphics/mostperformantasbuild.png}
 \end{slide}
 
-\begin{slide}{Acceleration Structure Building}
-  \begin{itemize}
-   \item
-  \end{itemize}
+\chapterIntroConfig
+\begin{slide}{BVH Building Algorithms}
 \end{slide}
+\defaultConfig
 
 \subsection{LBVH}
 
@@ -295,6 +297,7 @@
    \item Calculates intersection results for a single BVH node
    \item Returns child nodes sorted by intersection distance for internal AABB nodes
    \item Returns intersection results (incl. barycentrics for triangles) for leaf nodes
+   \item New in RDNA3: Ray flag handling and more box sorting modes
   \end{itemize}
  \end{itemize}
  \begin{itemize}
@@ -515,27 +518,80 @@
  \includegraphics[width=\textwidth]{graphics/RTStages2-8.png}
 \end{slide}
 
-
-\section{Case Studies: Why Some Games Were Broken}
-
-\chapterIntroConfig
-\begin{slide}{Case Studies: Why Some Games Were Broken}
-\end{slide}
-\defaultConfig
-
-\subsection{DOOM Eternal}
-\subsection{Cyberpunk 2077}
-\subsection{Nearly All Other D3D12 Games}
-
-\section{What's To Come}
+\section{Status And What's To Come}
 
 \chapterIntroConfig
-\begin{slide}{What's To Come}
+\begin{slide}{Status And What's To Come}
 \end{slide}
 \defaultConfig
 
 \subsection{Where We Are}
+\begin{slide}{Compatibility}
+ XDC 2022: \\
+ \begin{itemize}
+  \item Quake II RTX
+  \item Control
+  \item Deathloop
+  \item Resident Evil: Village
+  \item Metro Exodus Enhanced Edition
+ \end{itemize}
+
+ \pause
+
+ \vspace{12pt}
+
+ XDC 2023: \\
+ \begin{itemize}
+  \item General expectation is that new stuff works
+  \item Some known issues (Witcher 3, Cyberpunk 2077 can hang currently)
+  \item Unknown if RADV bug
+ \end{itemize}
+\end{slide}
+
+\begin{slide}{Performance}
+\begin{center}
+  \includegraphics[width=0.95\textwidth]{graphics/perfcomparison-rtreflections.png}
+\end{center}
+\end{slide}
+
+\begin{slide}{Performance (2)}
+\begin{center}
+  \includegraphics[width=0.92\textwidth]{graphics/perfcomparison-control.png}
+\end{center}
+\end{slide}
+
 \subsection{Where We're Going}
+\begin{slide}{Future Work}
+ \begin{itemize}
+  \item Make remaining games work
+  \begin{itemize}
+    \item Something else broken?
+    \item https://gitlab.freedesktop.org/mesa/mesa/-/issues/new
+  \end{itemize}
+  \item Make remaining games work \textbf{fast}
+  \item Explore more sophisticated shader call techniques
+  \begin{itemize}
+   \item Shader Execution Reordering?
+  \end{itemize}
+  \item Take advantage of RDNA3 features
+  \item Tons of microoptimizations
+ \end{itemize}
+
+\end{slide}
+
+\chapterIntroConfig
+\begin{slide}{ }
+ \begin{center}
+ % wtf??? normal text should be white
+ \textcolor{white}{
+ \huge
+ \textbf{Thank You!}\\ \vspace{6pt}
+ \normalsize
+ Questions?}
+ \end{center}
+\end{slide}
+\defaultConfig
+
 
 \end{document}
 
