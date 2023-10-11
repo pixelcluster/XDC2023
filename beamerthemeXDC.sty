@@ -9,18 +9,23 @@
 
 \newenvironment{slide}{\begin{frame}}{\end{frame}}
 
-\setbeamercolor{normal text}{fg=darkgray}
-\setbeamercolor{titlelike}{fg=darkgray}
+\setbeamersize{sidebar width left=0pt}
+\setbeamersize{text margin left=15pt}
+
+\newcommand{\defaultConfig}{
+\setbeamercolor{normal}{fg=darkgray}
+\setbeamercolor{title}{fg=darkgray}
+\setbeamercolor{structure}{fg=darkgray}
 \setbeamercolor{itemize item}{fg=darkgray}
 \setbeamercolor{itemize subitem}{fg=darkgray}
 \setbeamercolor{itemize subsubitem}{fg=darkgray}
+\setbeamercolor{enumerate item}{fg=darkgray}
+\setbeamercolor{enumerate subitem}{fg=darkgray}
+\setbeamercolor{enumerate subsubitem}{fg=darkgray}
 \setbeamercolor{section in head/foot}{fg=darkgray}
 \setbeamercolor{section in toc}{fg=darkgray}
 \setbeamercolor{subsection in toc}{fg=darkgray}
 \setbeamercolor{subsubsection in toc}{fg=darkgray}
-
-\setbeamersize{sidebar width left=0pt}
-\setbeamersize{text margin left=15pt}
 
 \setbeamertemplate{headline}{
     \vspace{4pt}
@@ -52,6 +57,85 @@
     \vspace{12pt}
     \huge\textbf{\insertframetitle}
 }
+
+
+    \usebackgroundtemplate{}
+}
+
+
+\newcommand{\setBackground}[1]{
+    \pgfdeclareimage[width=\paperwidth]{background}{#1}
+}
+
+\newcommand{\chapterIntroConfig}{
+    \usebackgroundtemplate{
+        \begin{picture}(100,256)(0,0)
+            \put(0,0){\pgfuseimage{background}}
+        \end{picture}
+    }
+\setbeamercolor{normal}{fg=white}
+\setbeamercolor{title page}{fg=white}
+\setbeamercolor{title}{fg=white}
+\setbeamercolor{structure}{fg=white}
+\setbeamercolor{itemize item}{fg=white}
+\setbeamercolor{itemize subitem}{fg=white}
+\setbeamercolor{itemize subsubitem}{fg=white}
+\setbeamercolor{enumerate item}{fg=white}
+\setbeamercolor{enumerate subitem}{fg=white}
+\setbeamercolor{enumerate subsubitem}{fg=white}
+\setbeamercolor{section in head/foot}{fg=white}
+\setbeamercolor{section in toc}{fg=white}
+\setbeamercolor{subsection in toc}{fg=white}
+\setbeamercolor{subsubsection in toc}{fg=white}
+
+\setbeamertemplate{headline}{
+    \vspace{4pt}
+    \begin{beamercolorbox}[ht=2ex]{section in head/foot}
+    \end{beamercolorbox}
+}
+
+\setbeamertemplate{footline}{
+}
+
+\setbeamertemplate{frametitle}{
+    \vspace{12pt}
+    \begin{center}
+    \huge\textbf{\insertframetitle}
+    \end{center}
+}
+
+\setbeamertemplate{title page}{
+
+	\vspace{10pt}
+
+    \begin{center}
+        \huge
+        \textbf{\inserttitle}
+    \end{center}
+
+	\large
+	\insertsubtitle
+
+	\vspace{35pt}
+
+    \begin{minipage}[t]{0.7\textwidth}
+    \hfill
+    \end{minipage}
+    \begin{minipage}[t]{0.28\textwidth}
+        \begin{center}
+            \normalsize
+            \insertauthor
+
+            \vspace{35pt}
+            \insertdate
+        \end{center}
+    \end{minipage}
+
+}
+
+
+}
+
 
 \setbeamertemplate{itemize item}{
     \raisebox{0.66pt}{\hbox{\large\donotcoloroutermaths$\bullet$}}
