@@ -124,7 +124,7 @@
     \includegraphics[width=1.0651\linewidth]{./graphics/RTStages9.png}
     \pause
     \begin{itemize}
-    \item Callable shaders can be called from any stage
+    \item Callable shaders can be called from RGen/CHit/Miss(/Callable)
     \end{itemize}
 \end{slide}
 
@@ -160,7 +160,7 @@
   \item RADV implements acceleration structures as BVHs
   \begin{itemize}
     \item Tree of AABBs and triangles
-    \item Internal nodes are AABBs, leaf nodes are AABB/triangle/BLAS pointer
+    \item Internal nodes are AABBs, each leaf node represents a primitive
     \item A node's AABB is the AABB of its child nodes
   \end{itemize}
   \item Hardware format is BVH4
@@ -170,6 +170,13 @@
  \end{itemize}
 
  \begin{minipage}[t]{0.45\textwidth}
+ \vspace*{2pt}
+ Node ID packing:
+ \begin{itemize}
+  \item Node offset in BVH / 8
+  \item 3 LSBs used for node type
+ \end{itemize}
+
 % now that's a way to write code
 \texttt{struct radv\_bvh\_box32\_node \{\\
 \hspace*{8pt} uint32\_t children[4];\\
@@ -315,6 +322,12 @@
 \end{slide}
 
 \begin{slide}{Layout of a Raytracing pipeline - XDC 2022}
+\begin{itemize}
+ \item Inline all raytracing shaders into a single compute shader
+ \item Shaders are referred to by IDs
+ \item Wrapped in a loop that continues executing shaders unless exit is requested
+\end{itemize}
+
   \texttt{void main() \{ \\
   \hspace*{8pt}uint32\_t shader\_id = raygen\_sbt[0]; \\
   \hspace*{8pt}while (shader\_id != 0) \{ \\
@@ -323,6 +336,9 @@
   \hspace*{16pt}\} \\
   \hspace*{8pt}\} \\
   \}} \\
+\end{slide}
+
+\begin{slide}{Layout of a Raytracing pipeline - XDC 2022}
  Problem: Raytracing pipelines can get \textbf{big} (2000+ shaders)
  \begin{itemize}
   \item Size of shaders caused stack overflows during passes that operated recursively on blocks
@@ -469,7 +485,7 @@
   \item Certain shader types will always be preferred over others
   \item Prefer Hit/Miss over Traversal shaders
   \item Execute Raygen only when no other shaders are available
-  \item Shader type is packed into the 4 LSBs of the shader's address
+  \item Shader type is packed into the 2 LSBs of the shader's address
  \end{itemize}
  \includegraphics[width=\textwidth]{graphics/RTStages2-1.png}
 \end{slide}
@@ -480,7 +496,7 @@
   \item Certain shader types will always be preferred over others
   \item Prefer Hit/Miss over Traversal shaders
   \item Execute Raygen only when no other shaders are available
-  \item Shader type is packed into the 4 LSBs of the shader's address
+  \item Shader type is packed into the 2 LSBs of the shader's address
  \end{itemize}
  \includegraphics[width=\textwidth]{graphics/RTStages2-2.png}
 \end{slide}
@@ -491,7 +507,7 @@
   \item Certain shader types will always be preferred over others
   \item Prefer Hit/Miss over Traversal shaders
   \item Execute Raygen only when no other shaders are available
-  \item Shader type is packed into the 4 LSBs of the shader's address
+  \item Shader type is packed into the 2 LSBs of the shader's address
  \end{itemize}
  \includegraphics[width=\textwidth]{graphics/RTStages2-3.png}
 \end{slide}
@@ -502,7 +518,7 @@
   \item Certain shader types will always be preferred over others
   \item Prefer Hit/Miss over Traversal shaders
   \item Execute Raygen only when no other shaders are available
-  \item Shader type is packed into the 4 LSBs of the shader's address
+  \item Shader type is packed into the 2 LSBs of the shader's address
  \end{itemize}
  \includegraphics[width=\textwidth]{graphics/RTStages2-7.png}
 \end{slide}
@@ -513,7 +529,7 @@
   \item Certain shader types will always be preferred over others
   \item Prefer Hit/Miss over Traversal shaders
   \item Execute Raygen only when no other shaders are available
-  \item Shader type is packed into the 4 LSBs of the shader's address
+  \item Shader type is packed into the 2 LSBs of the shader's address
  \end{itemize}
  \includegraphics[width=\textwidth]{graphics/RTStages2-8.png}
 \end{slide}
@@ -544,7 +560,10 @@
  \begin{itemize}
   \item General expectation is that new stuff works
   \item Some known issues (Witcher 3, Cyberpunk 2077 can hang currently)
-  \item Unknown if RADV bug
+  \item Something else broken?
+  \begin{itemize}
+   \item https://gitlab.freedesktop.org/mesa/mesa/-/issues/new
+  \end{itemize}
  \end{itemize}
 \end{slide}
 
@@ -564,16 +583,15 @@
 \begin{slide}{Future Work}
  \begin{itemize}
   \item Make remaining games work
-  \begin{itemize}
-    \item Something else broken?
-    \item https://gitlab.freedesktop.org/mesa/mesa/-/issues/new
-  \end{itemize}
   \item Make remaining games work \textbf{fast}
   \item Explore more sophisticated shader call techniques
   \begin{itemize}
    \item Shader Execution Reordering?
   \end{itemize}
+  \item Make the monolithic path work with pipeline libraries
   \item Take advantage of RDNA3 features
+  \item Build higher quality BVHs
+  \item AS Updates
   \item Tons of microoptimizations
  \end{itemize}
 
