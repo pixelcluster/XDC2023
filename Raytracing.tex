@@ -2,6 +2,7 @@
 
 \usetheme{XDC}
 \usepackage[utf8]{inputenc}
+\usepackage{listings}
 
 \author{Friedrich Vock}
 
@@ -10,6 +11,11 @@
 \date{October 17, 2023}
 
 \setBackground{graphics/frogrender.png}
+
+\lstset{
+  basicstyle=\Tiny\ttfamily,
+  columns=fullflexible,
+}
 
 \chapterIntroConfig
 
@@ -307,6 +313,67 @@
   }\\
 \end{slide}
 
+\begin{frame}[fragile]{Totally sane BVH building code}
+\small
+  \begin{lstlisting}[columns=fullflexible]
+controlBarrier(gl_ScopeWorkgroup, gl_ScopeDevice, gl_StorageSemanticsBuffer,
+               gl_SemanticsAcquireRelease | gl_SemanticsMakeAvailable | gl_SemanticsMakeVisible);
+if (gl_LocalInvocationIndex == 0) {
+   if (did_work)
+      atomicAdd(DEREF(header).sync_data.task_done_counter, 1);
+   global_task_index = atomicAdd(DEREF(header).sync_data.task_started_counter, 1);
+
+   do {
+      /* Perform a memory barrier to refresh the current phase's end counter, in case
+       * another workgroup changed it. */
+      memoryBarrier(gl_ScopeDevice, gl_StorageSemanticsBuffer,
+                    gl_SemanticsAcquireRelease | gl_SemanticsMakeAvailable | gl_SemanticsMakeVisible);
+
+      /* The first invocation of the first workgroup in a new phase is responsible to initiate the
+       * switch to a new phase. It is only possible to switch to a new phase if all tasks of the
+       * previous phase have been completed. Switching to a new phase and incrementing the phase
+       * end counter in turn notifies all invocations for that phase that it is safe to execute.
+       */
+      if (global_task_index == DEREF(header).sync_data.current_phase_end_counter &&
+          DEREF(header).sync_data.task_done_counter == DEREF(header).sync_data.current_phase_end_counter) {
+         if (DEREF(header).sync_data.next_phase_exit_flag != 0) {
+            DEREF(header).sync_data.phase_index = TASK_INDEX_INVALID;
+            memoryBarrier(gl_ScopeDevice, gl_StorageSemanticsBuffer,
+                          gl_SemanticsAcquireRelease | gl_SemanticsMakeAvailable | gl_SemanticsMakeVisible);
+         } else {
+            atomicAdd(DEREF(header).sync_data.phase_index, 1);
+            DEREF(header).sync_data.current_phase_start_counter = DEREF(header).sync_data.current_phase_end_counter;
+            /* Ensure the changes to the phase index and start/end counter are visible for other
+             * workgroup waiting in the loop. */
+            memoryBarrier(gl_ScopeDevice, gl_StorageSemanticsBuffer,
+                          gl_SemanticsAcquireRelease | gl_SemanticsMakeAvailable | gl_SemanticsMakeVisible);
+            atomicAdd(DEREF(header).sync_data.current_phase_end_counter,
+                      DIV_ROUND_UP(task_count(header), gl_WorkGroupSize.x));
+         }
+         break;
+      }
+
+      /* If other invocations have finished all nodes, break out; there is no work to do */
+      if (DEREF(header).sync_data.phase_index == TASK_INDEX_INVALID) {
+         break;
+      }
+   } while (global_task_index >= DEREF(header).sync_data.current_phase_end_counter);
+
+   shared_phase_index = DEREF(header).sync_data.phase_index;
+ }
+
+barrier();
+if (DEREF(header).sync_data.phase_index == TASK_INDEX_INVALID)
+   return TASK_INDEX_INVALID;
+
+num_tasks_to_skip = shared_phase_index - phase_index;
+
+uint32_t local_task_index = global_task_index - DEREF(header).sync_data.current_phase_start_counter;
+return local_task_index * gl_WorkGroupSize.x + gl_LocalInvocationID.x;
+  \end{lstlisting}
+  \normalsize
+\end{frame}
+
 \section{Implementing Raytracing Pipelines}
 
 \chapterIntroConfig
@@ -329,7 +396,7 @@
   \begin{itemize}
    \item Optimization for stack handling
    \item Not used in RADV (yet)
-  \end{itemize}+
+  \end{itemize}
  \end{itemize}
 \end{slide}
 
@@ -405,7 +472,7 @@
 \begin{slide}{Layout of a Raytracing pipeline - XDC 2023}
  ``Separate Compilation'' mode:
  \begin{itemize}
-  \item ``True'' shader calls - actual indirect jump
+  \item Shader calls with indirect jump
   \item Allows shaders from pipeline libraries to be compiled ahead of time
  \end{itemize}
 
@@ -442,7 +509,7 @@
  \end{itemize}
 \end{slide}
 
-\begin{slide}{Implementing ``True'' Shader Calls}
+\begin{slide}{Implementing Indirect Jumps}
  \begin{itemize}
   \item Jump execution to arbitrary addresses stored in SBT
   \item Each invocation in a wavefront may have a different address
@@ -455,7 +522,7 @@
  \includegraphics[width=\textwidth]{graphics/RTStages2-1.png}
 \end{slide}
 
-\begin{slide}{Implementing ``True'' Shader Calls}
+\begin{slide}{Implementing Indirect Jumps}
  \begin{itemize}
   \item Jump execution to arbitrary addresses stored in SBT
   \item Each invocation in a wavefront may have a different address
@@ -467,7 +534,7 @@
  \includegraphics[width=\textwidth]{graphics/RTStages2-2.png}
 \end{slide}
 
-\begin{slide}{Implementing ``True'' Shader Calls}
+\begin{slide}{Implementing Indirect Jumps}
  \begin{itemize}
   \item Jump execution to arbitrary addresses stored in SBT
   \item Each invocation in a wavefront may have a different address
@@ -479,7 +546,7 @@
  \includegraphics[width=\textwidth]{graphics/RTStages2-3.png}
 \end{slide}
 
-\begin{slide}{Implementing ``True'' Shader Calls}
+\begin{slide}{Implementing Indirect Jumps}
  \begin{itemize}
   \item Jump execution to arbitrary addresses stored in SBT
   \item Each invocation in a wavefront may have a different address
@@ -491,7 +558,7 @@
  \includegraphics[width=\textwidth]{graphics/RTStages2-4.png}
 \end{slide}
 
-\begin{slide}{Implementing ``True'' Shader Calls}
+\begin{slide}{Implementing Indirect Jumps}
  \begin{itemize}
   \item Jump execution to arbitrary addresses stored in SBT
   \item Each invocation in a wavefront may have a different address
@@ -503,7 +570,7 @@
  \includegraphics[width=\textwidth]{graphics/RTStages2-5.png}
 \end{slide}
 
-\begin{slide}{Implementing ``True'' Shader Calls}
+\begin{slide}{Implementing Indirect Jumps}
  \begin{itemize}
   \item Jump execution to arbitrary addresses stored in SBT
   \item Each invocation in a wavefront may have a different address
@@ -515,7 +582,7 @@
  \includegraphics[width=\textwidth]{graphics/RTStages2-6.png}
 \end{slide}
 
-\begin{slide}{Implementing ``True'' Shader Calls}
+\begin{slide}{Implementing Indirect Jumps}
  \begin{itemize}
   \item Solution: Select shader based on type
   \item Certain shader types will always be preferred over others
@@ -526,7 +593,7 @@
  \includegraphics[width=\textwidth]{graphics/RTStages2-1.png}
 \end{slide}
 
-\begin{slide}{Implementing ``True'' Shader Calls}
+\begin{slide}{Implementing Indirect Jumps}
  \begin{itemize}
   \item Solution: Select shader based on type
   \item Certain shader types will always be preferred over others
@@ -537,7 +604,7 @@
  \includegraphics[width=\textwidth]{graphics/RTStages2-2.png}
 \end{slide}
 
-\begin{slide}{Implementing ``True'' Shader Calls}
+\begin{slide}{Implementing Indirect Jumps}
  \begin{itemize}
   \item Solution: Select shader based on type
   \item Certain shader types will always be preferred over others
@@ -548,7 +615,7 @@
  \includegraphics[width=\textwidth]{graphics/RTStages2-3.png}
 \end{slide}
 
-\begin{slide}{Implementing ``True'' Shader Calls}
+\begin{slide}{Implementing Indirect Jumps}
  \begin{itemize}
   \item Solution: Select shader based on type
   \item Certain shader types will always be preferred over others
@@ -559,7 +626,7 @@
  \includegraphics[width=\textwidth]{graphics/RTStages2-7.png}
 \end{slide}
 
-\begin{slide}{Implementing ``True'' Shader Calls}
+\begin{slide}{Implementing Indirect Jumps}
  \begin{itemize}
   \item Solution: Select shader based on type
   \item Certain shader types will always be preferred over others
