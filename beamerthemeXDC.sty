@@ -64,12 +64,12 @@
 
 
 \newcommand{\setBackground}[1]{
-    \pgfdeclareimage[width=\paperwidth]{background}{#1}
+    \pgfdeclareimage[width=\paperwidth,height=\paperheight]{background}{#1}
 }
 
 \newcommand{\chapterIntroConfig}{
     \usebackgroundtemplate{
-        \begin{picture}(100,256)(0,0)
+        \begin{picture}(\paperwidth,\paperheight)(0,0)
             \put(0,0){\pgfuseimage{background}}
         \end{picture}
     }

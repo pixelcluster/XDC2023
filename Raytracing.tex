@@ -212,6 +212,23 @@
    \item Bad for building many tiny acceleration structures
    \item Vulkan allows for building multiple acceleration structures at a time
   \end{itemize}
+ \end{itemize}
+\end{slide}
+
+\begin{slide}{Acceleration Structure Building}
+ \begin{itemize}
+  \item Building acceleration structures is a multi-step process
+  \begin{enumerate}
+   \item Convert input primitives to leaf nodes
+   \item Sort nodes
+   \item Construct binary BVH
+   \item Convert binary BVH to BVH4
+  \end{enumerate}
+  \item Need barriers in between each step!
+  \begin{itemize}
+   \item Bad for building many tiny acceleration structures
+   \item Vulkan allows for building multiple acceleration structures at a time
+  \end{itemize}
   \pause
   \item This is what happens when you don't batch:
  \end{itemize}
@@ -296,6 +313,25 @@
 \begin{slide}{Implementing Raytracing Pipelines}
 \end{slide}
 \defaultConfig
+
+\begin{slide}{Hardware Acceleration Features on AMD}
+ \begin{itemize}
+  \item Instruction for hardware-accelerated ray-BVH intersection: \texttt{image\_bvh\_intersect\_ray}
+  \begin{itemize}
+   \item Calculates intersection results for a single BVH node
+   \item Returns child nodes sorted by intersection distance for internal AABB nodes
+   \item Returns intersection results (incl. barycentrics for triangles) for leaf nodes
+   \item New in RDNA3: Ray flag handling and more box sorting modes
+  \end{itemize}
+ \end{itemize}
+ \begin{itemize}
+  \item New in RDNA3: Instruction for LDS traversal stack: \texttt{ds\_bvh\_stack\_rtn}
+  \begin{itemize}
+   \item Optimization for stack handling
+   \item Not used in RADV (yet)
+  \end{itemize}+
+ \end{itemize}
+\end{slide}
 
 \begin{slide}{Hardware Acceleration Features on AMD}
  \begin{itemize}
@@ -570,12 +606,6 @@
 \begin{slide}{Performance}
 \begin{center}
   \includegraphics[width=0.95\textwidth]{graphics/perfcomparison-rtreflections.png}
-\end{center}
-\end{slide}
-
-\begin{slide}{Performance (2)}
-\begin{center}
-  \includegraphics[width=0.92\textwidth]{graphics/perfcomparison-control.png}
 \end{center}
 \end{slide}
 
